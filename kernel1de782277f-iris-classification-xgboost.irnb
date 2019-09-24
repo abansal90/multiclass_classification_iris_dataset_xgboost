@@ -1,0 +1,501 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "_execution_state": "idle",
+    "_uuid": "051d70d956493feee0c6d64651c6a088724dca2a"
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "── \u001b[1mAttaching packages\u001b[22m ─────────────────────────────────────── tidyverse 1.2.1 ──\n",
+      "\n",
+      "\u001b[32m✔\u001b[39m \u001b[34mggplot2\u001b[39m 3.2.1.\u001b[31m9000\u001b[39m     \u001b[32m✔\u001b[39m \u001b[34mpurrr  \u001b[39m 0.3.2     \n",
+      "\u001b[32m✔\u001b[39m \u001b[34mtibble \u001b[39m 2.1.3          \u001b[32m✔\u001b[39m \u001b[34mdplyr  \u001b[39m 0.8.3     \n",
+      "\u001b[32m✔\u001b[39m \u001b[34mtidyr  \u001b[39m 0.8.3          \u001b[32m✔\u001b[39m \u001b[34mstringr\u001b[39m 1.4.0     \n",
+      "\u001b[32m✔\u001b[39m \u001b[34mreadr  \u001b[39m 1.3.1          \u001b[32m✔\u001b[39m \u001b[34mforcats\u001b[39m 0.4.0     \n",
+      "\n",
+      "── \u001b[1mConflicts\u001b[22m ────────────────────────────────────────── tidyverse_conflicts() ──\n",
+      "\u001b[31m✖\u001b[39m \u001b[34mdplyr\u001b[39m::\u001b[32mfilter()\u001b[39m masks \u001b[34mstats\u001b[39m::filter()\n",
+      "\u001b[31m✖\u001b[39m \u001b[34mdplyr\u001b[39m::\u001b[32mlag()\u001b[39m    masks \u001b[34mstats\u001b[39m::lag()\n",
+      "\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "'iris-flower-dataset'"
+      ],
+      "text/latex": [
+       "'iris-flower-dataset'"
+      ],
+      "text/markdown": [
+       "'iris-flower-dataset'"
+      ],
+      "text/plain": [
+       "[1] \"iris-flower-dataset\""
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "## Importing packages\n",
+    "\n",
+    "# This R environment comes with all of CRAN and many other helpful packages preinstalled.\n",
+    "# You can see which packages are installed by checking out the kaggle/rstats docker image: \n",
+    "# https://github.com/kaggle/docker-rstats\n",
+    "\n",
+    "library(tidyverse) # metapackage with lots of helpful functions\n",
+    "\n",
+    "## Running code\n",
+    "\n",
+    "# In a notebook, you can run a single code cell by clicking in the cell and then hitting \n",
+    "# the blue arrow to the left, or by clicking in the cell and pressing Shift+Enter. In a script, \n",
+    "# you can run code by highlighting the code you want to run and then clicking the blue arrow\n",
+    "# at the bottom of this window.\n",
+    "\n",
+    "## Reading in files\n",
+    "\n",
+    "# You can access files from datasets you've added to this kernel in the \"../input/\" directory.\n",
+    "# You can see the files added to this kernel by running the code below. \n",
+    "\n",
+    "list.files(path = \"../input\")\n",
+    "\n",
+    "## Saving data\n",
+    "\n",
+    "# If you save any files or images, these will be put in the \"output\" directory. You \n",
+    "# can see the output directory by committing and running your kernel (using the \n",
+    "# Commit & Run button) and then checking out the compiled version of your kernel."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# https://www.datatechnotes.com/2018/03/classification-with-xgboost-model-in-r.html"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Attaching package: ‘xgboost’\n",
+      "\n",
+      "\n",
+      "The following object is masked from ‘package:dplyr’:\n",
+      "\n",
+      "    slice\n",
+      "\n",
+      "\n",
+      "Loading required package: lattice\n",
+      "\n",
+      "\n",
+      "Attaching package: ‘caret’\n",
+      "\n",
+      "\n",
+      "The following object is masked from ‘package:purrr’:\n",
+      "\n",
+      "    lift\n",
+      "\n",
+      "\n",
+      "The following object is masked from ‘package:httr’:\n",
+      "\n",
+      "    progress\n",
+      "\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "library(xgboost)\n",
+    "library(caret) "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Load dataset\n",
+    "df = read.csv('../input/iris-flower-dataset/IRIS.csv')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<table>\n",
+       "<caption>A data.frame: 6 × 5</caption>\n",
+       "<thead>\n",
+       "\t<tr><th></th><th scope=col>sepal_length</th><th scope=col>sepal_width</th><th scope=col>petal_length</th><th scope=col>petal_width</th><th scope=col>species</th></tr>\n",
+       "\t<tr><th></th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;dbl&gt;</th><th scope=col>&lt;fct&gt;</th></tr>\n",
+       "</thead>\n",
+       "<tbody>\n",
+       "\t<tr><th scope=row>1</th><td>5.1</td><td>3.5</td><td>1.4</td><td>0.2</td><td>Iris-setosa</td></tr>\n",
+       "\t<tr><th scope=row>2</th><td>4.9</td><td>3.0</td><td>1.4</td><td>0.2</td><td>Iris-setosa</td></tr>\n",
+       "\t<tr><th scope=row>3</th><td>4.7</td><td>3.2</td><td>1.3</td><td>0.2</td><td>Iris-setosa</td></tr>\n",
+       "\t<tr><th scope=row>4</th><td>4.6</td><td>3.1</td><td>1.5</td><td>0.2</td><td>Iris-setosa</td></tr>\n",
+       "\t<tr><th scope=row>5</th><td>5.0</td><td>3.6</td><td>1.4</td><td>0.2</td><td>Iris-setosa</td></tr>\n",
+       "\t<tr><th scope=row>6</th><td>5.4</td><td>3.9</td><td>1.7</td><td>0.4</td><td>Iris-setosa</td></tr>\n",
+       "</tbody>\n",
+       "</table>\n"
+      ],
+      "text/latex": [
+       "A data.frame: 6 × 5\n",
+       "\\begin{tabular}{r|lllll}\n",
+       "  & sepal\\_length & sepal\\_width & petal\\_length & petal\\_width & species\\\\\n",
+       "  & <dbl> & <dbl> & <dbl> & <dbl> & <fct>\\\\\n",
+       "\\hline\n",
+       "\t1 & 5.1 & 3.5 & 1.4 & 0.2 & Iris-setosa\\\\\n",
+       "\t2 & 4.9 & 3.0 & 1.4 & 0.2 & Iris-setosa\\\\\n",
+       "\t3 & 4.7 & 3.2 & 1.3 & 0.2 & Iris-setosa\\\\\n",
+       "\t4 & 4.6 & 3.1 & 1.5 & 0.2 & Iris-setosa\\\\\n",
+       "\t5 & 5.0 & 3.6 & 1.4 & 0.2 & Iris-setosa\\\\\n",
+       "\t6 & 5.4 & 3.9 & 1.7 & 0.4 & Iris-setosa\\\\\n",
+       "\\end{tabular}\n"
+      ],
+      "text/markdown": [
+       "\n",
+       "A data.frame: 6 × 5\n",
+       "\n",
+       "| <!--/--> | sepal_length &lt;dbl&gt; | sepal_width &lt;dbl&gt; | petal_length &lt;dbl&gt; | petal_width &lt;dbl&gt; | species &lt;fct&gt; |\n",
+       "|---|---|---|---|---|---|\n",
+       "| 1 | 5.1 | 3.5 | 1.4 | 0.2 | Iris-setosa |\n",
+       "| 2 | 4.9 | 3.0 | 1.4 | 0.2 | Iris-setosa |\n",
+       "| 3 | 4.7 | 3.2 | 1.3 | 0.2 | Iris-setosa |\n",
+       "| 4 | 4.6 | 3.1 | 1.5 | 0.2 | Iris-setosa |\n",
+       "| 5 | 5.0 | 3.6 | 1.4 | 0.2 | Iris-setosa |\n",
+       "| 6 | 5.4 | 3.9 | 1.7 | 0.4 | Iris-setosa |\n",
+       "\n"
+      ],
+      "text/plain": [
+       "  sepal_length sepal_width petal_length petal_width species    \n",
+       "1 5.1          3.5         1.4          0.2         Iris-setosa\n",
+       "2 4.9          3.0         1.4          0.2         Iris-setosa\n",
+       "3 4.7          3.2         1.3          0.2         Iris-setosa\n",
+       "4 4.6          3.1         1.5          0.2         Iris-setosa\n",
+       "5 5.0          3.6         1.4          0.2         Iris-setosa\n",
+       "6 5.4          3.9         1.7          0.4         Iris-setosa"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "head(df)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "indexes = createDataPartition(iris$Species, p=.9, list=F)\n",
+    "train = iris[indexes, ]\n",
+    "test = iris[-indexes, ]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "train_x = data.matrix(train[,-5])\n",
+    "train_y = train[,5]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "test_x = data.matrix(test[,-5])\n",
+    "test_y = test[,5]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "xgb_train = xgb.DMatrix(data=train_x, label=train_y)\n",
+    "xgb_test = xgb.DMatrix(data=test_x, label=test_y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[1]\ttrain-rmse:1.212623 \n",
+      "[2]\ttrain-rmse:0.864040 \n",
+      "[3]\ttrain-rmse:0.618881 \n",
+      "[4]\ttrain-rmse:0.448535 \n",
+      "[5]\ttrain-rmse:0.329059 \n",
+      "[6]\ttrain-rmse:0.247970 \n",
+      "[7]\ttrain-rmse:0.192119 \n",
+      "[8]\ttrain-rmse:0.151316 \n",
+      "[9]\ttrain-rmse:0.124375 \n",
+      "[10]\ttrain-rmse:0.107014 \n",
+      "[11]\ttrain-rmse:0.086912 \n",
+      "[12]\ttrain-rmse:0.072363 \n",
+      "[13]\ttrain-rmse:0.068434 \n",
+      "[14]\ttrain-rmse:0.059323 \n",
+      "[15]\ttrain-rmse:0.057756 \n",
+      "[16]\ttrain-rmse:0.050285 \n",
+      "[17]\ttrain-rmse:0.046399 \n",
+      "[18]\ttrain-rmse:0.044895 \n",
+      "[19]\ttrain-rmse:0.039174 \n",
+      "[20]\ttrain-rmse:0.036837 \n",
+      "[21]\ttrain-rmse:0.033702 \n",
+      "[22]\ttrain-rmse:0.030965 \n",
+      "[23]\ttrain-rmse:0.029191 \n",
+      "[24]\ttrain-rmse:0.027755 \n",
+      "[25]\ttrain-rmse:0.026557 \n",
+      "[26]\ttrain-rmse:0.024630 \n",
+      "[27]\ttrain-rmse:0.023863 \n",
+      "[28]\ttrain-rmse:0.023361 \n",
+      "[29]\ttrain-rmse:0.022068 \n",
+      "[30]\ttrain-rmse:0.020365 \n",
+      "[31]\ttrain-rmse:0.019673 \n",
+      "[32]\ttrain-rmse:0.018921 \n",
+      "[33]\ttrain-rmse:0.018122 \n",
+      "[34]\ttrain-rmse:0.017545 \n",
+      "[35]\ttrain-rmse:0.015593 \n",
+      "[36]\ttrain-rmse:0.013919 \n",
+      "[37]\ttrain-rmse:0.013340 \n",
+      "[38]\ttrain-rmse:0.012687 \n",
+      "[39]\ttrain-rmse:0.012313 \n",
+      "[40]\ttrain-rmse:0.012133 \n",
+      "[41]\ttrain-rmse:0.011970 \n",
+      "[42]\ttrain-rmse:0.011921 \n",
+      "[43]\ttrain-rmse:0.011689 \n",
+      "[44]\ttrain-rmse:0.010912 \n",
+      "[45]\ttrain-rmse:0.010550 \n",
+      "[46]\ttrain-rmse:0.009999 \n",
+      "[47]\ttrain-rmse:0.009698 \n",
+      "[48]\ttrain-rmse:0.008953 \n",
+      "[49]\ttrain-rmse:0.008464 \n",
+      "[50]\ttrain-rmse:0.007881 \n"
+     ]
+    }
+   ],
+   "source": [
+    "xgbc = xgboost(data=xgb_train, max.depth=3, nrounds=50)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "##### xgb.Booster\n",
+      "raw: 29.8 Kb \n",
+      "call:\n",
+      "  xgb.train(params = params, data = dtrain, nrounds = nrounds, \n",
+      "    watchlist = watchlist, verbose = verbose, print_every_n = print_every_n, \n",
+      "    early_stopping_rounds = early_stopping_rounds, maximize = maximize, \n",
+      "    save_period = save_period, save_name = save_name, xgb_model = xgb_model, \n",
+      "    callbacks = callbacks, max.depth = 3)\n",
+      "params (as set within xgb.train):\n",
+      "  max_depth = \"3\", silent = \"1\"\n",
+      "xgb.attributes:\n",
+      "  niter\n",
+      "callbacks:\n",
+      "  cb.print.evaluation(period = print_every_n)\n",
+      "  cb.evaluation.log()\n",
+      "# of features: 4 \n",
+      "niter: 50\n",
+      "nfeatures : 4 \n",
+      "evaluation_log:\n",
+      "    iter train_rmse\n",
+      "       1   1.212623\n",
+      "       2   0.864040\n",
+      "---                \n",
+      "      49   0.008464\n",
+      "      50   0.007881\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(xgbc)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      " [1] 0.9985509 1.0003450 0.9994667 0.9994667 0.9985509 2.0055523 3.0124078\n",
+      " [8] 1.6412597 1.9992549 1.9957011 3.0007060 2.9230304 2.4224658 3.0035832\n",
+      "[15] 2.9340029\n"
+     ]
+    }
+   ],
+   "source": [
+    "pred = predict(xgbc, xgb_test)\n",
+    "print(pred)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      " [1] setosa     setosa     setosa     setosa     setosa     versicolor\n",
+      " [7] virginica  versicolor versicolor versicolor virginica  virginica \n",
+      "[13] versicolor virginica  virginica \n",
+      "Levels: setosa versicolor virginica\n"
+     ]
+    }
+   ],
+   "source": [
+    "pred[(pred>3)] = 3\n",
+    "pred_y = as.factor((levels(test_y))[round(pred)])\n",
+    "print(pred_y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Confusion Matrix and Statistics\n",
+      "\n",
+      "            Reference\n",
+      "Prediction   setosa versicolor virginica\n",
+      "  setosa          5          0         0\n",
+      "  versicolor      0          4         1\n",
+      "  virginica       0          1         4\n",
+      "\n",
+      "Overall Statistics\n",
+      "                                          \n",
+      "               Accuracy : 0.8667          \n",
+      "                 95% CI : (0.5954, 0.9834)\n",
+      "    No Information Rate : 0.3333          \n",
+      "    P-Value [Acc > NIR] : 3.143e-05       \n",
+      "                                          \n",
+      "                  Kappa : 0.8             \n",
+      "                                          \n",
+      " Mcnemar's Test P-Value : NA              \n",
+      "\n",
+      "Statistics by Class:\n",
+      "\n",
+      "                     Class: setosa Class: versicolor Class: virginica\n",
+      "Sensitivity                 1.0000            0.8000           0.8000\n",
+      "Specificity                 1.0000            0.9000           0.9000\n",
+      "Pos Pred Value              1.0000            0.8000           0.8000\n",
+      "Neg Pred Value              1.0000            0.9000           0.9000\n",
+      "Prevalence                  0.3333            0.3333           0.3333\n",
+      "Detection Rate              0.3333            0.2667           0.2667\n",
+      "Detection Prevalence        0.3333            0.3333           0.3333\n",
+      "Balanced Accuracy           1.0000            0.8500           0.8500\n"
+     ]
+    }
+   ],
+   "source": [
+    "cm = confusionMatrix(test_y, pred_y)\n",
+    "print(cm)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         orig factor              pred rounded     pred.1\n",
+      "1      setosa      1 0.998550891876221       1     setosa\n",
+      "2      setosa      1  1.00034499168396       1     setosa\n",
+      "3      setosa      1  0.99946665763855       1     setosa\n",
+      "4      setosa      1  0.99946665763855       1     setosa\n",
+      "5      setosa      1 0.998550891876221       1     setosa\n",
+      "6  versicolor      2  2.00555229187012       2 versicolor\n",
+      "7  versicolor      2                 3       3  virginica\n",
+      "8  versicolor      2  1.64125967025757       2 versicolor\n",
+      "9  versicolor      2  1.99925494194031       2 versicolor\n",
+      "10 versicolor      2  1.99570107460022       2 versicolor\n",
+      "11  virginica      3                 3       3  virginica\n",
+      "12  virginica      3  2.92303037643433       3  virginica\n",
+      "13  virginica      3  2.42246580123901       2 versicolor\n",
+      "14  virginica      3                 3       3  virginica\n",
+      "15  virginica      3  2.93400287628174       3  virginica\n"
+     ]
+    }
+   ],
+   "source": [
+    "result = cbind(orig=as.character(test_y),\n",
+    "               factor=as.factor(test_y),\n",
+    "               pred=pred,\n",
+    "               rounded=round(pred),\n",
+    "               pred=as.character(levels(test_y))[round(pred)])\n",
+    " \n",
+    "print(data.frame(result))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "R",
+   "language": "R",
+   "name": "ir"
+  },
+  "language_info": {
+   "codemirror_mode": "r",
+   "file_extension": ".r",
+   "mimetype": "text/x-r-source",
+   "name": "R",
+   "pygments_lexer": "r",
+   "version": "3.6.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 1
+}
